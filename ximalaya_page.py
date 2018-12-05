@@ -31,7 +31,8 @@ class XiMa(object):
     'https://www.ximalaya.com/revision/play/tracks?trackIds=90616407'  获取源音频的api
     """
     def __init__(self):
-        self.category_Url = 'https://www.ximalaya.com/category/'
+        # self.category_Url = 'https://www.ximalaya.com/category/'
+        self.category_Url = 'https://www.ximalaya.com/youshengshu/4202564/'
         self.base_url = 'https://www.ximalaya.com'
         self.base_api = 'https://www.ximalaya.com/revision/play/tracks?trackIds='
         self.header = randomAgent()
@@ -57,7 +58,8 @@ class XiMa(object):
                              r'max="(\d+)" class="control-input tthf" value=""/>', r.text, re.S)
         pagenum = int(pagenum[0])
         # 循环获取每一页，这里暂时获取第一页
-
+        if pagenum == []:
+            pagenum = 1
         fout = open("ximalaya_ID.txt", 'a+', encoding='utf-8')
 
         for i in range(1, pagenum + 1):

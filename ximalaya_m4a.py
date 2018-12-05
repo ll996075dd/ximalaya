@@ -1,9 +1,13 @@
+__author__ = 'dzt'
+__date__ = '2018/12/05 21:33'
+
 # encoding: utf-8
 import requests
 import re
+import sys
 import random
-from time import sleep
 import json
+from time import sleep
 
 sep = '\n'
 sep1 = '*'*50 + '\n'
@@ -37,10 +41,12 @@ def Xima(url):
     headers = randomAgent()
     r = requests.session().get(url, headers=headers)
 
-    fout = open("ximalaya_ID.txt", 'a+', encoding='utf-8')
+    filename_id = "ximalaya_ID.txt"
+    fout = open(filename_id, 'a+', encoding='utf-8')
 
     # <div class="text rC5T"><a title="《飞翔的秘密》[澳大利亚]伊莎·贾德" href="/youshengshu/4202564/134753995">《飞翔的秘密》[澳大利亚]伊莎·贾德</a></div>
     result = re.findall(r'<div class="text rC5T"><a title=".*?" href="(.*?)">(.*?)</a></div>', r.text, re.S)
+    trackIds_list = []
     # print(result)
     for i in result:
         # 每个音频的地址
@@ -48,21 +54,15 @@ def Xima(url):
         # 每个音频的 title
         # print(second_url, i[1])
 
-        res = re.findall(r'\d+(?<![/])\d+', second_url, re.S)
-        # trackId = re.findall(r'\d+$', second_url, re.S)
-        # print(res)
+        res = re.findall(r'(?<=/)\d+$', second_url, re.S)
+        # res = re.findall(r'\d+(?<![/])\d+', second_url, re.S)
+        for x in res:
+            print(x)
 
-        # for x in res:
-        #     print(x)
-        # for y in trackId:
-        #     print(y)
-
+            fout.write("%s, %s" % (x, i[1]) + sep)
+        # break
 
         # fout.write("%s,%s" % (second_url, i[1]) + sep)
-        # fout.write("%s，%s" % (x, i[1]) + sep)
-        fout.write("%s %s %s" % (res[0], res[1], i[1]) + sep)
-        break
-
     fout.close()
 
 
@@ -83,9 +83,10 @@ def get_more_page(url):
         # print(page_url)
         # 爬取一页break
         fout.write("第%s页，%s" % (str(i), page_url) + sep)
-        break
+        # break
     fout.close()
     return filename
+
 
 
 def runXima(filename):
@@ -93,9 +94,8 @@ def runXima(filename):
     for each in f:
         ip = re.findall(r'https.*/$', str(each), re.S)
         print(ip[0])
-        # Xima(ip[0])
-        sleep(1)
-
+        Xima(ip[0])
+        # sleep(1)
 
 
 def XimaAPI(filename_api, outfilename):
@@ -105,34 +105,35 @@ def XimaAPI(filename_api, outfilename):
     fout = open(outfilename, 'w+', encoding='utf-8')
     for each in fapi:
         id = re.findall(r'\d+', str(each), re.S)
-        # print('albumId:'+id[0])
-        # print('trackId:'+id[1])
-        # 只需要albumId
-        # page_api = API % (id[0], id[1])
-        page_api = API % (id[0])
+        print('trackId:'+id[0])
+        page_api = API + id[0]
         # print(page_api)
         res = requests.get(page_api, headers=headers).content
         res = json.loads(res)
         # print(res)
         data = res.get('data')
-        for i in data:
-            playUrl64 = i.get('playUrl64')  # mp3 地址
-            playUrl32 = i.get('playUrl32')
-            albumImage = i.get('albumImage')  # 图片地址
-            albumTitle = i.get('albumTitle')  # 专辑名字
-            title = i.get('title')  # 音频名字
-            print(playUrl64)
-            print(playUrl32)
-            print(albumImage)
-            print(title + albumTitle)
+        tracksForAudioPlay = data.get('tracksForAudioPlay')
 
-            fout.write("音频名字：%s 专辑名字：%s，图片地址：%s， mp3地址：%s" % (title, albumTitle, albumImage, playUrl64) + sep)
-            # break
+        i = tracksForAudioPlay[0]
+
+        playUrl64 = i.get('src')  # m4a 地址
+        albumImage = i.get('trackCoverPath')  # 图片地址
+        albumTitle = i.get('albumName')  # 专辑名字
+        title = i.get('trackName')  # 音频名字
+        # print(playUrl64)
+        # print(playUrl32)
+        # print(albumImage)
+        print(title + albumTitle)
+
+        fout.write("音频名字：%s 专辑名字：%s，图片地址：%s， m4a地址：%s" % (title, albumTitle, albumImage, playUrl64) + sep)
+
+
+    fapi.close()
+    fout.close()
 
 
 if __name__ == '__main__':
     # url = sys.argv[1]
-    # filename = get_more_page('https://www.ximalaya.com/yinyue/3850056/')
-    # filename = "ximalaya_page.txt"
-    # runXima(filename)
-    XimaAPI("ximalaya_ID.txt", "info.txt")
+    filename = get_more_page('https://www.ximalaya.com/yinyue/4202564/')
+    runXima(filename)
+    XimaAPI('ximalaya_ID.txt', 'm4a_info.txt')
