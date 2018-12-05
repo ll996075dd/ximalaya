@@ -31,7 +31,8 @@ class XiMa(object):
     'https://www.ximalaya.com/revision/play/tracks?trackIds=90616407'  获取源音频的api
     """
     def __init__(self):
-        self.category_Url = 'https://www.ximalaya.com/category/'
+        # self.category_Url = 'https://www.ximalaya.com/category/'
+        self.category_Url = 'https://www.ximalaya.com/youshengshu/4202564/'
         self.base_url = 'https://www.ximalaya.com'
         self.base_api = 'https://www.ximalaya.com/revision/play/tracks?trackIds='
         self.header = randomAgent()
