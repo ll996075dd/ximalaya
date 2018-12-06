@@ -74,24 +74,39 @@ def XimaAPI(filename_api, outfilename):
             playUrl64 = i.get('playUrl64')  # mp3 地址
             playUrl32 = i.get('playUrl32')
             albumImage = i.get('albumImage')  # 图片地址
+            albumImage = re.findall(r'.*(?<![!op_type=5&upload_type=album&device_type=android&name=medium])',
+                                    albumImage, re.S)[0]
+            if albumImage == []:
+                continue
             albumTitle = i.get('albumTitle')  # 专辑名字
             title = i.get('title')  # 音频名字
+            mp3name = re.findall(r'(?<=《)[^》]+(?=》)', title, re.S)
+            if mp3name == []:
+                mp3name = re.findall(r'.*', title, re.S)
+            author = re.findall(r'(?=》).*', title, re.S)
+            if author == []:
+                author = re.findall(r'.*', title, re.S)
+            mp3name = mp3name[0]
+            # print(author)
+            author = author[0].lstrip('》')
+            print(mp3name)
+            print(author)
             # print(playUrl64)
             # print(albumImage)
-            print(title + albumTitle)
+            # print(title + albumTitle)
             # print(type(title))
             # 获取index为行数
             a = data.index(i)
             fout.write("音频名字：%s 专辑名字：%s，图片地址：%s， mp3地址：%s" % (title, albumTitle, albumImage, playUrl64) + sep)
             # 行  列   数据
-            sheet1.write(a, 0, title)
-            sheet1.write(a, 1, "1")
+            sheet1.write(a, 0, mp3name)
+            sheet1.write(a, 1, 24)
             sheet1.write(a, 2, playUrl64)
-            sheet1.write(a, 3, '')
-            sheet1.write(a, 4, '1')
-            sheet1.write(a, 5, '')
+            sheet1.write(a, 3, 0)
+            sheet1.write(a, 4, 99)
+            sheet1.write(a, 5, 1)
             sheet1.write(a, 6, albumTitle)
-            sheet1.write(a, 7, '')
+            sheet1.write(a, 7, author)
             sheet1.write(a, 8, '')
             sheet1.write(a, 9, '')
             sheet1.write(a, 10, '')
